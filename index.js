@@ -4,11 +4,21 @@ const express=require('express')
 const dataService =require('../bankServer/services/data.services')
 
 //create an app using express
+//server application name
 const app=express()
 
-//to parse json
+//application specific middlewares
+const appMiddleware=(req,res,next)=>{
+console.log("Specific middlewares");
+next()
+}
 
+app.use(appMiddleware)
+
+//to parse json
 app.use(express.json())
+
+
 //resolve http requst from clint
 
 //GET - to read the data
@@ -51,6 +61,18 @@ app.post('/login',(req,res)=>{
 //Deposit API
 app.post('/deposit',(req,res)=>{
     const result=dataService.deposit(req.body.acno,req.body.password,req.body.amt)
+    res.status(result.statuCode).json(result)
+})
+
+//Withdraw API
+app.post('/withdraw',(req,res)=>{
+    const result=dataService.withdraw(req.body.acno,req.body.password,req.body.amt)
+    res.status(result.statuCode).json(result)
+})
+
+//Transaction API
+app.post('/transaction',(req,res)=>{
+    const result=dataService.getTransaction(req.body.acno)
     res.status(result.statuCode).json(result)
 })
 
