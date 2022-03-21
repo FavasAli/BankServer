@@ -1,6 +1,9 @@
 //importing the express in the index.js
 const express=require('express')
 
+//import jsonwebtoken
+const jwt = require('jsonwebtoken')
+
 const dataService =require('../bankServer/services/data.services')
 
 //create an app using express
@@ -11,6 +14,27 @@ const app=express()
 const appMiddleware=(req,res,next)=>{
 console.log("Specific middlewares");
 next()
+}
+
+//to verify token
+
+const jwtMiddleware = (req,res,next) => {
+
+  try{  
+    //   const token=req.body.token // token put in body
+      const token=req.headers["x-access-token"] // token put in headers
+
+    //verify token
+   const data= jwt.verify(token,'supersecretkey123')
+   req.currentAcno = data.currentAcno
+   next()}
+   catch{
+       res.status(422).json({
+           status:false,
+           message:"Please Login in"
+       })
+   }
+
 }
 
 app.use(appMiddleware)
@@ -59,24 +83,24 @@ app.post('/login',(req,res)=>{
 })
 
 //Deposit API
-app.post('/deposit',(req,res)=>{
+app.post('/deposit',jwtMiddleware, (req,res)=>{
     const result=dataService.deposit(req.body.acno,req.body.password,req.body.amt)
     res.status(result.statuCode).json(result)
 })
 
 //Withdraw API
-app.post('/withdraw',(req,res)=>{
-    const result=dataService.withdraw(req.body.acno,req.body.password,req.body.amt)
+app.post('/withdraw',jwtMiddleware,(req,res)=>{
+    const result=dataService.withdraw(req,req.body.acno,req.body.password,req.body.amt)
     res.status(result.statuCode).json(result)
 })
 
 //Transaction API
-app.post('/transaction',(req,res)=>{
+app.post('/transaction',jwtMiddleware,(req,res)=>{
     const result=dataService.getTransaction(req.body.acno)
     res.status(result.statuCode).json(result)
 })
 
 //set up the post number
 app.listen(3000,() =>{
-    console.log("server started at post:3000");
+    console.log("server started at port:3000");
 })

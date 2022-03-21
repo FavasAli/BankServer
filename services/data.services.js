@@ -1,3 +1,6 @@
+//import jsonwebtoken
+const jwt = require('jsonwebtoken')
+
 database = {
   1000: { acno: 1000, uname: "Neer", password: 1000, balance: 5000, transaction: [] },
   1001: { acno: 1001, uname: "Vyom", password: 1001, balance: 5000, transaction: [] },
@@ -39,11 +42,19 @@ const login = (acno, password) => {
     if (password == database[acno]["password"]) {
       currentAcno = acno
       currentUser = database[acno]["uname"]
+
+      //token generation
+      const token =jwt.sign({
+        currentAcno:acno
+      },'supersecretkey123')
+
+
       return {
         statuCode: 200,
         status: true,
         message: "Log in Successfully!!!!",
-        currentAcno, currentUser
+        currentAcno, currentUser,
+        token
       }
     }
     else {
@@ -105,12 +116,17 @@ const deposit = (acno, password, amt) => {
 
 
 //withdraw definition
-const withdraw = (acno, password, amt) => {
+const withdraw = (req,acno, password, amt) => {
+
+  var currentAcno = req.currentAcno
   var amount = parseInt(amt)
   if (acno in database) {
     if (password == database[acno]["password"]) {
-
+      if(currentAcno == acno)
+      { 
+        
       if (database[acno]["balance"] > amount) {
+       
         database[acno]["balance"] -= amount
         database[acno]["transaction"].push({
           amount: amount,
@@ -132,6 +148,18 @@ const withdraw = (acno, password, amt) => {
 
         }
       }
+        
+      }
+      else
+      {
+        return {
+          statuCode: 422,
+          status: false,
+          message: "Operation Deniesd.!!"
+
+        }
+      }
+
     }
     else {
       return {
