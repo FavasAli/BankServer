@@ -6,9 +6,22 @@ const jwt = require('jsonwebtoken')
 
 const dataService =require('../bankServer/services/data.services')
 
+//cors 
+const cors=require('cors')
+
 //create an app using express
 //server application name
 const app=express()
+
+//use cors to specify origin
+app.use(cors({
+    origin:'http://localhost:4200'
+}))
+
+//set up the post number
+app.listen(3000,() =>{
+    console.log("server started at port:3000");
+})
 
 //application specific middlewares
 const appMiddleware=(req,res,next)=>{
@@ -72,35 +85,42 @@ app.delete('/',(req,res)=>{
 
 //Register API
 app.post('/register',(req,res)=>{
-    const result=dataService.register(req.body.acno,req.body.password,req.body.uname)
-    res.status(result.statuCode).json(result)
+    dataService.register(req.body.acno,req.body.password,req.body.uname)
+    .then(result=>{
+        res.status(result.statuCode).json(result)
+    })
 })
 
 //Login API
 app.post('/login',(req,res)=>{
-    const result=dataService.login(req.body.acno,req.body.password)
-    res.status(result.statuCode).json(result)
+    dataService.login(req.body.acno,req.body.pswd)
+    .then(result=>{
+        res.status(result.statuCode).json(result)
+    })
 })
 
 //Deposit API
 app.post('/deposit',jwtMiddleware, (req,res)=>{
-    const result=dataService.deposit(req.body.acno,req.body.password,req.body.amt)
-    res.status(result.statuCode).json(result)
+    dataService.deposit(req.body.acno,req.body.password,req.body.amt)
+    .then(result=>{
+        res.status(result.statuCode).json(result)
+    })
 })
 
 //Withdraw API
 app.post('/withdraw',jwtMiddleware,(req,res)=>{
-    const result=dataService.withdraw(req,req.body.acno,req.body.password,req.body.amt)
-    res.status(result.statuCode).json(result)
+    dataService.withdraw(req,req.body.acno,req.body.password,req.body.amt)
+    .then(result=>{
+        res.status(result.statuCode).json(result)
+    })
 })
 
 //Transaction API
 app.post('/transaction',jwtMiddleware,(req,res)=>{
-    const result=dataService.getTransaction(req.body.acno)
-    res.status(result.statuCode).json(result)
+    dataService.getTransaction(req.body.acno)
+    .then(result=>{
+        res.status(result.statuCode).json(result)
+    })
 })
 
-//set up the post number
-app.listen(3000,() =>{
-    console.log("server started at port:3000");
-})
+
